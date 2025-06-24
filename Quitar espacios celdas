@@ -1,0 +1,25 @@
+Sub QuitarEspaciosDeRango()
+    Dim celda As Range
+    Dim rango As Range
+    Dim textoLimpio As String
+    
+    ' Define el rango manualmente seleccionando el rango antes de ejecutar la macro.
+    Set rango = Application.Selection
+    
+    For Each celda In rango
+        If Not IsEmpty(celda.Value) Then
+            ' Limpieza de espacios normales y no imprimibles
+            textoLimpio = celda.Value
+            textoLimpio = Application.WorksheetFunction.Trim(textoLimpio)      ' Elimina espacios al inicio y final y reduce múltiples internos a uno
+            textoLimpio = Replace(textoLimpio, " ", "")                        ' Elimina todos los espacios normales
+            textoLimpio = Replace(textoLimpio, Chr(160), "")                   ' Elimina espacios no imprimibles (por ejemplo, del PDF)
+            textoLimpio = Replace(textoLimpio, vbTab, "")                      ' Elimina tabulaciones
+            textoLimpio = Replace(textoLimpio, vbCr, "")                       ' Elimina retornos de carro
+            textoLimpio = Replace(textoLimpio, vbLf, "")                       ' Elimina saltos de línea
+
+            celda.Value = textoLimpio
+        End If
+    Next celda
+
+    MsgBox "¡Espacios eliminados correctamente!", vbInformation
+End Sub
