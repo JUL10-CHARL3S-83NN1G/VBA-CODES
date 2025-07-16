@@ -1,0 +1,89 @@
+Sub IrACeldaDeFormulaExtendido()
+
+    Dim formula As String
+    Dim direccion As String
+    Dim libroNombre As String
+    Dim hojaNombre As String
+    Dim celdaNombre As String
+    Dim partes() As String
+    Dim wb As Workbook
+    Dim ws As Worksheet
+    Dim rng As Range
+    Dim libroYaAbierto As Boolean
+
+    If ActiveCell Is Nothing Then
+        MsgBox "No hay ninguna celda seleccionada.", vbExclamation
+        Exit Sub
+    End If
+
+    formula = ActiveCell.formula
+
+    If formula = "" Or Left(formula, 1) <> "=" Then
+        MsgBox "La celda seleccionada no contiene una fórmula válida.", vbInformation
+        Exit Sub
+    End If
+
+    direccion = Replace(formula, "=", "")
+    
+    On Error GoTo ErrorHandler
+
+    ' ------------------------------
+    ' CASO 1: MISMO LIBRO
+    ' ------------------------------
+    If InStr(direccion, "[") = 0 Then
+        partes = Split(direccion, "!")
+        If UBound(partes) <> 1 Then GoTo ErrorHandler
+
+        Set ws = ThisWorkbook.Sheets(Trim(partes(0)))
+        Set rng = ws.Range(Trim(partes(1)))
+
+        ThisWorkbook.NewWindow.Activate
+        ws.Activate
+        rng.Select
+        ActiveWindow.ScrollRow = rng.Row
+
+        Exit Sub
+    End If
+
+    ' ------------------------------
+    ' CASO 2: OTRO LIBRO
+    ' ------------------------------
+    ' Ejemplo: '[OtroLibro.xlsx]Hoja1'!B5
+    partes = Split(direccion, "]")
+    If UBound(partes) < 1 Then GoTo ErrorHandler
+
+    libroNombre = Mid(partes(0), InStr(partes(0), "[") + 1)
+    hojaNombre = Replace(partes(1), "'", "")
+    hojaNombre = Split(hojaNombre, "!")(0)
+    celdaNombre = Split(direccion, "!")(1)
+
+    ' Verificar si el libro ya está abierto
+    libroYaAbierto = False
+    For Each wb In Application.Workbooks
+        If wb.Name = libroNombre Then
+            libroYaAbierto = True
+            Exit For
+        End If
+    Next
+
+    If Not libroYaAbierto Then
+        On Error Resume Next
+        Set wb = Workbooks.Open(Filename:=ThisWorkbook.Path & "\" & libroNombre)
+        On Error GoTo ErrorHandler
+    End If
+
+    If wb Is Nothing Then Set wb = Workbooks(libroNombre)
+    Set ws = wb.Sheets(hojaNombre)
+    Set rng = ws.Range(celdaNombre)
+
+    wb.Windows(1).Activate
+    ws.Activate
+    rng.Select
+    ActiveWindow.ScrollRow = rng.Row
+
+    Exit Sub
+
+ErrorHandler:
+    MsgBox "No se pudo procesar la referencia. Verifica que la fórmula esté bien escrita o que el archivo esté accesible.", vbCritical
+End Sub
+
