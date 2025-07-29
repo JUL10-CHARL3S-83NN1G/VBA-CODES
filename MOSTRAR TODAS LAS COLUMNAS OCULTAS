@@ -1,0 +1,17 @@
+Sub MostrarColumnasOcultas()
+    Dim i As Long
+    Dim mensaje As String
+
+    For i = 1 To ActiveSheet.Columns.Count
+        If Columns(i).Hidden Then
+            mensaje = mensaje & Columns(i).Address(False, False) & ", "
+        End If
+    Next i
+
+    If Len(mensaje) > 0 Then
+        mensaje = Left(mensaje, Len(mensaje) - 2) ' Quitar última coma y espacio
+        MsgBox "Columnas ocultas en la hoja activa: " & vbCrLf & mensaje
+    Else
+        MsgBox "No hay columnas ocultas en la hoja activa."
+    End If
+End Sub
