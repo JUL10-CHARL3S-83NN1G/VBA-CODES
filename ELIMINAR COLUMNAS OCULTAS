@@ -1,0 +1,19 @@
+Sub EliminarColumnasOcultas()
+    Dim hoja As Worksheet
+    Dim col As Range
+    Dim i As Long
+
+    Application.ScreenUpdating = False
+
+    For Each hoja In ThisWorkbook.Worksheets
+        For i = hoja.Columns.Count To 1 Step -1
+            If hoja.Columns(i).EntireColumn.Hidden Then
+                hoja.Columns(i).EntireColumn.Delete
+            End If
+        Next i
+    Next hoja
+
+    Application.ScreenUpdating = True
+
+    MsgBox "Columnas ocultas eliminadas en todas las hojas."
+End Sub
