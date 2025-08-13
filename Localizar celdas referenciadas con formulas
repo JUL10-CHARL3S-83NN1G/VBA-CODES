@@ -27,35 +27,40 @@ Sub IrACeldaDeFormulaExtendido()
     
     On Error GoTo ErrorHandler
 
-    ' ------------------------------
-    ' CASO 1: MISMO LIBRO
-    ' ------------------------------
-    If InStr(direccion, "[") = 0 Then
-        partes = Split(direccion, "!")
-        If UBound(partes) <> 1 Then GoTo ErrorHandler
+' ------------------------------
+' CASO 1: MISMO LIBRO
+' ------------------------------
+If InStr(direccion, "[") = 0 Then
+    partes = Split(direccion, "!")
+    If UBound(partes) <> 1 Then GoTo ErrorHandler
 
-        Set ws = ThisWorkbook.Sheets(Trim(partes(0)))
-        Set rng = ws.Range(Trim(partes(1)))
+    hojaNombre = Replace(partes(0), "'", "") ' <-- Limpia comillas simples
+    celdaNombre = partes(1)
 
-        ThisWorkbook.NewWindow.Activate
-        ws.Activate
-        rng.Select
-        ActiveWindow.ScrollRow = rng.Row
+    Set ws = ThisWorkbook.Sheets(Trim(hojaNombre))
+    Set rng = ws.Range(Trim(celdaNombre))
 
-        Exit Sub
-    End If
+    ThisWorkbook.NewWindow.Activate
+    ws.Activate
+    rng.Select
+    ActiveWindow.ScrollRow = rng.Row
 
-    ' ------------------------------
-    ' CASO 2: OTRO LIBRO
-    ' ------------------------------
-    ' Ejemplo: '[OtroLibro.xlsx]Hoja1'!B5
-    partes = Split(direccion, "]")
-    If UBound(partes) < 1 Then GoTo ErrorHandler
+    Exit Sub
+End If
 
-    libroNombre = Mid(partes(0), InStr(partes(0), "[") + 1)
-    hojaNombre = Replace(partes(1), "'", "")
-    hojaNombre = Split(hojaNombre, "!")(0)
-    celdaNombre = Split(direccion, "!")(1)
+' ------------------------------
+' CASO 2: OTRO LIBRO
+' ------------------------------
+partes = Split(direccion, "]")
+If UBound(partes) < 1 Then GoTo ErrorHandler
+
+libroNombre = Mid(partes(0), InStr(partes(0), "[") + 1)
+
+hojaNombre = Split(partes(1), "!")(0)
+hojaNombre = Replace(hojaNombre, "'", "") ' <-- Limpia comillas simples
+
+celdaNombre = Split(direccion, "!")(1)
+
 
     ' Verificar si el libro ya está abierto
     libroYaAbierto = False
