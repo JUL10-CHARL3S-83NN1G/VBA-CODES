@@ -10,57 +10,77 @@ Sub IrACeldaDeFormulaExtendido()
     Dim ws As Worksheet
     Dim rng As Range
     Dim libroYaAbierto As Boolean
+    Dim esSuma As Boolean
 
     If ActiveCell Is Nothing Then
         MsgBox "No hay ninguna celda seleccionada.", vbExclamation
         Exit Sub
     End If
 
-    formula = ActiveCell.formula
+    formula = ActiveCell.Formula
 
     If formula = "" Or Left(formula, 1) <> "=" Then
         MsgBox "La celda seleccionada no contiene una fórmula válida.", vbInformation
         Exit Sub
     End If
 
-    direccion = Replace(formula, "=", "")
+    ' Detectar si es una función SUMA
+    esSuma = (UCase(Left(formula, 5)) = "=SUM(" Or UCase(Left(formula, 6)) = "=SUMA(")
     
+    ' Mostrar aviso si es suma
+    If esSuma Then
+        MsgBox "El valor de esta celda corresponde a una suma, definida por:" & vbCrLf & formula, vbInformation
+    End If
+
+    ' Extraer la referencia de celda (si es SUMA, toma solo la primera celda del rango)
+    direccion = Replace(formula, "=", "")
+
+    ' Si es SUMA, procesar para quedarnos solo con la primera celda
+    If esSuma Then
+        Dim inicioPar As Long, finPar As Long
+        inicioPar = InStr(direccion, "(")
+        finPar = InStr(direccion, ")")
+        If inicioPar > 0 And finPar > inicioPar Then
+            direccion = Mid(direccion, inicioPar + 1, finPar - inicioPar - 1)
+            direccion = Split(direccion, ":")(0) ' Solo la primera celda del rango
+        End If
+    End If
+
     On Error GoTo ErrorHandler
 
-' ------------------------------
-' CASO 1: MISMO LIBRO
-' ------------------------------
-If InStr(direccion, "[") = 0 Then
-    partes = Split(direccion, "!")
-    If UBound(partes) <> 1 Then GoTo ErrorHandler
+    ' ------------------------------
+    ' CASO 1: MISMO LIBRO
+    ' ------------------------------
+    If InStr(direccion, "[") = 0 Then
+        partes = Split(direccion, "!")
+        If UBound(partes) <> 1 Then GoTo ErrorHandler
 
-    hojaNombre = Replace(partes(0), "'", "") ' <-- Limpia comillas simples
-    celdaNombre = partes(1)
+        hojaNombre = Replace(partes(0), "'", "")
+        celdaNombre = partes(1)
 
-    Set ws = ThisWorkbook.Sheets(Trim(hojaNombre))
-    Set rng = ws.Range(Trim(celdaNombre))
+        Set ws = ThisWorkbook.Sheets(Trim(hojaNombre))
+        Set rng = ws.Range(Trim(celdaNombre))
 
-    ThisWorkbook.NewWindow.Activate
-    ws.Activate
-    rng.Select
-    ActiveWindow.ScrollRow = rng.Row
+        ThisWorkbook.NewWindow.Activate
+        ws.Activate
+        rng.Select
+        ActiveWindow.ScrollRow = rng.Row
 
-    Exit Sub
-End If
+        Exit Sub
+    End If
 
-' ------------------------------
-' CASO 2: OTRO LIBRO
-' ------------------------------
-partes = Split(direccion, "]")
-If UBound(partes) < 1 Then GoTo ErrorHandler
+    ' ------------------------------
+    ' CASO 2: OTRO LIBRO
+    ' ------------------------------
+    partes = Split(direccion, "]")
+    If UBound(partes) < 1 Then GoTo ErrorHandler
 
-libroNombre = Mid(partes(0), InStr(partes(0), "[") + 1)
+    libroNombre = Mid(partes(0), InStr(partes(0), "[") + 1)
 
-hojaNombre = Split(partes(1), "!")(0)
-hojaNombre = Replace(hojaNombre, "'", "") ' <-- Limpia comillas simples
+    hojaNombre = Split(partes(1), "!")(0)
+    hojaNombre = Replace(hojaNombre, "'", "")
 
-celdaNombre = Split(direccion, "!")(1)
-
+    celdaNombre = Split(direccion, "!")(1)
 
     ' Verificar si el libro ya está abierto
     libroYaAbierto = False
@@ -91,4 +111,3 @@ celdaNombre = Split(direccion, "!")(1)
 ErrorHandler:
     MsgBox "No se pudo procesar la referencia. Verifica que la fórmula esté bien escrita o que el archivo esté accesible.", vbCritical
 End Sub
-
