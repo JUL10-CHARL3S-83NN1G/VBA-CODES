@@ -1,0 +1,99 @@
+' Formato SQL
+Sub ResaltarSQL()
+    Dim rngOriginal As Range
+    Dim rngTemp As Range
+    Dim palabrasClaveAzul As Variant, palabrasClaveRojo As Variant, palabrasClaveAmarillo As Variant
+    Dim palabra As Variant
+
+    palabrasClaveAzul = Array( _
+        "SELECT", "FROM", "AS", "WHERE", "JOIN", "ON", "AND", "OR", "GROUP", "BY", _
+        "ORDER", "INSERT", "UPDATE", "DELETE", "DESC", "ASC", "IS", "NOT", "DISTINCT", _
+        "OPEN", "VALUES", "CREATE", "ALTER", "DROP", "TABLE", "VIEW", "DATABASE", _
+        "INTO", "SET", "NULL", "PRIMARY", "KEY", "FOREIGN", "REFERENCES", "INDEX", _
+        "UNION", "ALL", "EXCEPT", "INTERSECT", "HAVING", "IN", "EXISTS", "BETWEEN", _
+        "LIKE", "CASE", "WHEN", "THEN", "ELSE", "END", "DEFAULT", "CHECK", "CONSTRAINT", _
+        "TRUNCATE", "MERGE", "TOP", "LIMIT", "OFFSET", "USE", "BEGIN", "COMMIT", "ROLLBACK" _
+)
+
+
+    palabrasClaveRojo = Array( _
+        "NULLS LAST", "NULLS FIRST", _
+        "INT", "INTEGER", "BIGINT", "SMALLINT", "TINYINT", "DECIMAL", "NUMERIC", "FLOAT", "REAL", "DOUBLE", "MONEY", "SMALLMONEY", _
+        "CHAR", "VARCHAR", "TEXT", "NCHAR", "NVARCHAR", "NTEXT", "CLOB", "BLOB", "JSON", "XML", _
+        "DATE", "TIME", "DATETIME", "TIMESTAMP", "YEAR", _
+        "BIT", "BOOLEAN", "BINARY", "VARBINARY", "IMAGE" _
+)
+
+                              
+    palabrasClaveAmarillo = Array( _
+        "ABS", "ROUND", "CEIL", "CEILING", "FLOOR", "POWER", "SQRT", "EXP", "LOG", "LOG10", "MOD", _
+        "RANDOM", "RAND", "NEWID", "CHECKSUM", _
+        "NOW", "GETDATE", "CURRENT_DATE", "DATEPART", "DATEDIFF", _
+        "UPPER", "LOWER", "SUBSTRING", "TRIM", "LENGTH", "CONCAT" _
+    )
+
+
+    Set rngOriginal = Selection.Range
+    rngOriginal.Font.Color = wdColorAutomatic ' Limpia formato previo
+    
+    ' Normaliza interlineado en todo el bloque de una vez
+    rngOriginal.ParagraphFormat.LineSpacingRule = wdLineSpaceExactly
+    rngOriginal.ParagraphFormat.LineSpacing = 12
+
+    ' Azul
+    For Each palabra In palabrasClaveAzul
+        Set rngTemp = rngOriginal.Duplicate
+        With rngTemp.Find
+            .ClearFormatting
+            .Text = palabra
+            .MatchCase = True
+            .MatchWholeWord = True
+            .Forward = True
+            .Wrap = wdFindStop
+            .Format = True
+            Do While .Execute
+                rngTemp.Font.Color = RGB(103, 154, 224)
+                rngTemp.Start = rngTemp.End
+            Loop
+        End With
+    Next palabra
+
+    ' Rojo
+    For Each palabra In palabrasClaveRojo
+        Set rngTemp = rngOriginal.Duplicate
+        With rngTemp.Find
+            .ClearFormatting
+            .Text = palabra
+            .MatchCase = True
+            .MatchWholeWord = True
+            .Forward = True
+            .Wrap = wdFindStop
+            .Format = True
+            Do While .Execute
+                rngTemp.Font.Color = RGB(240, 0, 0)
+                rngTemp.Start = rngTemp.End
+            Loop
+        End With
+    Next palabra
+    
+    ' Amarillo
+        For Each palabra In palabrasClaveAmarillo
+        Set rngTemp = rngOriginal.Duplicate
+        With rngTemp.Find
+            .ClearFormatting
+            .Text = palabra
+            .MatchCase = True
+            .MatchWholeWord = True
+            .Forward = True
+            .Wrap = wdFindStop
+            .Format = True
+            Do While .Execute
+                rngTemp.Font.Color = RGB(255, 255, 0)
+                rngTemp.Start = rngTemp.End
+            Loop
+        End With
+    Next palabra
+    
+End Sub
+
+
