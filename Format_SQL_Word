@@ -94,6 +94,52 @@ Sub ResaltarSQL()
         End With
     Next palabra
     
+    ' NARANJA - Números
+    For i = 0 To 9
+        Set rngTemp = rngOriginal.Duplicate
+        With rngTemp.Find
+            .ClearFormatting
+            .Text = CStr(i)
+            .MatchCase = True
+            .Forward = True
+            .Wrap = wdFindStop
+            Do While .Execute
+                rngTemp.Font.Color = RGB(255, 140, 105)
+                rngTemp.Start = rngTemp.End
+            Loop
+        End With
+    Next i
+        
+    
+    ' VERDE - Textos entre comillas simples
+    Set rngTemp = rngOriginal.Duplicate
+    With rngTemp.Find
+        .ClearFormatting
+        .Text = "'*'"
+        .MatchWildcards = True
+        .Forward = True
+        .Wrap = wdFindStop
+        Do While .Execute
+            rngTemp.Font.Color = RGB(76, 175, 80) ' Verde
+            rngTemp.Start = rngTemp.End
+        Loop
+    End With
+    
+    ' VERDE - Textos entre comillas dobles
+    Set rngTemp = rngOriginal.Duplicate
+    With rngTemp.Find
+        .ClearFormatting
+        .Text = """*"""
+        .MatchWildcards = True
+        .Forward = True
+        .Wrap = wdFindStop
+        Do While .Execute
+            rngTemp.Font.Color = RGB(76, 175, 80) ' Verde
+            rngTemp.Start = rngTemp.End
+        Loop
+    End With
+    
+    
 End Sub
 
 
