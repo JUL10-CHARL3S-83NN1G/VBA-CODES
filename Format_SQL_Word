@@ -6,13 +6,13 @@ Sub ResaltarSQL()
     Dim palabra As Variant
 
     palabrasClaveAzul = Array( _
-        "SELECT", "FROM", "AS", "WHERE", "JOIN", "ON", "AND", "OR", "GROUP", "BY", _
+        "SELECT", "FROM", "AS", "WHERE", "INNER", "JOIN", "ON", "AND", "OR", "GROUP", "BY", _
         "ORDER", "INSERT", "UPDATE", "DELETE", "DESC", "ASC", "IS", "NOT", "DISTINCT", _
         "OPEN", "VALUES", "CREATE", "ALTER", "DROP", "TABLE", "VIEW", "DATABASE", _
         "INTO", "SET", "NULL", "PRIMARY", "KEY", "FOREIGN", "REFERENCES", "INDEX", _
         "UNION", "ALL", "EXCEPT", "INTERSECT", "HAVING", "IN", "EXISTS", "BETWEEN", _
         "LIKE", "CASE", "WHEN", "THEN", "ELSE", "END", "DEFAULT", "CHECK", "CONSTRAINT", _
-        "TRUNCATE", "MERGE", "TOP", "LIMIT", "OFFSET", "USE", "BEGIN", "COMMIT", "ROLLBACK" _
+        "TRUNCATE", "MERGE", "TOP", "LIMIT", "OFFSET", "USE", "BEGIN", "COMMIT", "ROLLBACK", "LEFT", "RIGHT" _
 )
 
 
@@ -29,7 +29,8 @@ Sub ResaltarSQL()
         "ABS", "ROUND", "CEIL", "CEILING", "FLOOR", "POWER", "SQRT", "EXP", "LOG", "LOG10", "MOD", _
         "RANDOM", "RAND", "NEWID", "CHECKSUM", _
         "NOW", "GETDATE", "CURRENT_DATE", "DATEPART", "DATEDIFF", _
-        "UPPER", "LOWER", "SUBSTRING", "TRIM", "LENGTH", "CONCAT" _
+        "UPPER", "LOWER", "SUBSTRING", "TRIM", "LENGTH", "CONCAT", "COUNT", "AVG", "SUM", _
+        "MIN", "MAX" _
     )
 
 
@@ -39,7 +40,9 @@ Sub ResaltarSQL()
     ' Normaliza interlineado en todo el bloque de una vez
     rngOriginal.ParagraphFormat.LineSpacingRule = wdLineSpaceExactly
     rngOriginal.ParagraphFormat.LineSpacing = 12
-
+    'rngOriginal.Font.Color = RGB(255, 255, 255)
+    rngOriginal.Font.Color = wdColorAutomatic
+    
     ' Azul
     For Each palabra In palabrasClaveAzul
         Set rngTemp = rngOriginal.Duplicate
@@ -94,7 +97,7 @@ Sub ResaltarSQL()
         End With
     Next palabra
     
-    ' NARANJA - Números
+    ' NARANJA - Números (método más simple)
     For i = 0 To 9
         Set rngTemp = rngOriginal.Duplicate
         With rngTemp.Find
@@ -125,7 +128,7 @@ Sub ResaltarSQL()
         Loop
     End With
     
-    ' VERDE - Textos entre comillas dobles
+    ' VERDE - Textos entre comillas dobles - SE EJECUTA DESPUÉS (sobrescribe números)
     Set rngTemp = rngOriginal.Duplicate
     With rngTemp.Find
         .ClearFormatting
@@ -139,6 +142,20 @@ Sub ResaltarSQL()
         Loop
     End With
     
+        ' VERDE POCO MAS INTENSO - Comentarios que inician con "--"
+    Set rngTemp = rngOriginal.Duplicate
+    With rngTemp.Find
+        .ClearFormatting
+        .Text = "--*^13" ' -- seguido de cualquier cosa hasta el salto de párrafo
+        .MatchWildcards = True
+        .Forward = True
+        .Wrap = wdFindStop
+        Do While .Execute
+            rngTemp.Font.Color = RGB(0, 156, 0) ' Verde de comentarios
+            rngTemp.Start = rngTemp.End
+        Loop
+    End With
+
     
 End Sub
 
